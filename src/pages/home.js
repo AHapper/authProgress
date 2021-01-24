@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react'
+import Note from '../components/note';
 import firebase from '../firebase'
-
 import Drawer from '@material-ui/core/Drawer';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -16,6 +15,7 @@ import AccountBoxIcon from '@material-ui/icons/AccountBox';
 import NotesIcon from '@material-ui/icons/Notes';
 import Avatar from '@material-ui/core/avatar';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import { useHistory } from 'react-router-dom';
 //import CircularProgress from '@material-ui/core/CircularProgress';
 
 const drawerWidth = 240;
@@ -56,10 +56,11 @@ const styles = (theme) => ({
 	toolbar: theme.mixins.toolbar
 });
 
-function Home({ classes }) {
+// firebase authentication 
+const auth = firebase.auth();
 
-    const [data, setData] = useState([]);
-    const [newSpellName, setNewSpellName] = useState('');
+function Home({ classes }) {
+    let history = useHistory();
 
     const loadAccountPage = (event) => {
 		console.log('Account Clicked');
@@ -70,23 +71,10 @@ function Home({ classes }) {
 	};
 
 	const logoutHandler = (event) => {
-		console.log('Logout Clicked');
-		//this.props.history.push('/login');
+        console.log('Logout Clicked');
+        auth.signOut();
+		//history.push('/login');
 	};
-
-    const onCreate = () => {
-        const db = firebase.firestore();
-        db.collection("notes").add({ name: newSpellName });
-    };
-
-    useEffect(() => {
-        const fetchData = async () => {
-            const db = firebase.firestore();
-            const data = await db.collection("notes").get();
-            setData(data.docs.map(doc => ({ ...doc.data(), id: doc.id })));
-        };
-        fetchData();
-    }, []);
 
     return (
         <div>
@@ -142,19 +130,7 @@ function Home({ classes }) {
                         </ListItem>
                     </List>
                 </Drawer>
-
-                <div>                
-                    <ul>
-                        <input value={newSpellName} onChange={e => setNewSpellName(e.target.value)} />
-                        <button onClick={onCreate}>Creat</button>
-                        {data.map(note => (
-                            <li key={note.name}>
-                                {note.name}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
+                <div> <Note /> </div>
             </div>
 
 
